@@ -125,6 +125,7 @@ class Candleplot(object):
         ### main frame
         matplotlib.rcParams.update({'font.size': 9})
         self.fig = plt.figure(facecolor='#07000d', figsize=(12,8))
+        plt.pause(0.001)
         
         # upper plot
         self.ax1 = ax1 = plt.subplot2grid((5,4), (0,0), rowspan=4, colspan=4, axisbg='#07000d')  # 5high x 4wide grid, ax1 starts at (0,0) and covers 4x3 area  
@@ -154,9 +155,11 @@ class Candleplot(object):
 
     
         plt.subplots_adjust(left=0.06, right=0.97, bottom=0.05, top=0.94, hspace=0)
+        plt.pause(0.001)
     
         plt.setp(ax1.get_xticklabels(), visible=False) # hide x labels of upper subplot
-    
+        plt.pause(0.001)    
+        
         ax2.autoscale_view('tight')
 
     def candlewidth(self):
@@ -192,6 +195,7 @@ class Candleplot(object):
     
         # candles
         candlestick(self.ax1, candles, width=self.candlewidth(), colorup='cyan', colordown='blue')
+        plt.pause(0.001)
         self.ax1.set_ylabel('USD/BTC')
         self.ax1.autoscale_view('tight')
         self.ax1.grid(True, color='white', alpha=0.5)
@@ -225,9 +229,10 @@ class Candleplot(object):
             if bar:
                 self.ax2.bar(dates, volumes, width = self.candlewidth(), facecolor='#00ffe8')    # bar
             else:
-                self.ax2.plot(dates, volumes, '#00ffe8', linewidth=0.8)                 # curve
-                self.ax2.fill_between(dates, 0, volumes, facecolor='#00ffe8', alpha=0.5)
+                self.ax2.plot(dates, volumes, '#00ffe8', linewidth=0.8)                          # curve
+                self.ax2.fill_between(dates, 0, [float(x) for x in volumes], facecolor='#00ffe8', alpha=0.5)
             plt.ylabel('Volume')
+            plt.pause(0.001)
     
         ### legend, grid, formatting
         if indicators:
