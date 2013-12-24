@@ -16,9 +16,17 @@ Bitstamp trade data. Backtesting and live trade botting are in progress.
 
 
 Getting Started
-=========
+-------------
 
 A setup.py installer is not yet implemented; scripts can be run from 
 the same directory as the cryptrade package, or the cryptrade package can be
 placed in the python path. Several example scripts are provided which illustrate 
 the basic use. A data directory will be created wherever the scripts are run. 
+
+
+Acknowledgements
+-------------
+
+Plot design is based on a tutorial series from Sentdex.com
+
+<http://sentdex.com/sentiment-analysisbig-data-and-python-tutorials-algorithmic-trading/how-to-chart-stocks-and-forex-doing-your-own-financial-charting/>
