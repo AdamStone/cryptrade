@@ -30,3 +30,7 @@ Acknowledgements
 Plot design is based on a tutorial series from Sentdex.com
 
 <http://sentdex.com/sentiment-analysisbig-data-and-python-tutorials-algorithmic-trading/how-to-chart-stocks-and-forex-doing-your-own-financial-charting/>
+
+Bitfinex API python implementation is based on sample code by Raphael Nicolle 
+
+<https://community.bitfinex.com/showwiki.php?title=Sample+API+Code>
