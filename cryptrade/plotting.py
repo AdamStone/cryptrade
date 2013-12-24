@@ -195,7 +195,7 @@ class Candleplot(object):
     
         # candles
         candlestick(self.ax1, candles, width=self.candlewidth(), colorup='cyan', colordown='blue')
-        plt.pause(0.001)
+
         self.ax1.set_ylabel('USD/BTC')
         self.ax1.autoscale_view('tight')
         self.ax1.grid(True, color='white', alpha=0.5)
@@ -211,7 +211,7 @@ class Candleplot(object):
         
 #        for label in ax2.xaxis.get_ticklabels():
 #            label.set_rotation(45)
-    
+        plt.pause(0.001)
         # indicators
         plot_volume = True # default case
         for indicator in indicators:
