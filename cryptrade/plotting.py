@@ -220,7 +220,7 @@ class Candleplot(object):
                 self.ax1.plot(dates, values, label = indicator.name)
             if indicator.plot_type == 'secondary':
                 self.ax2.plot(dates, values, '#00ffe8', linewidth=0.8, label=indicator.name)
-                self.ax2.fill_between(dates, 0, values, facecolor='#00ffe8', alpha=0.5)
+                self.ax2.fill_between(dates, 0, [float(x) for x in values], facecolor='#00ffe8', alpha=0.5)
                 self.ax2.set_ylabel(indicator.name) 
                 plot_volume = False
     
