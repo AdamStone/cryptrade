@@ -50,6 +50,43 @@ case), local files of trade and candle data will be accumulated as the
 program continues to run.
 
 
+GUI Usage
+-------------
+
+
+![Market view window](/screenshots/marketwindow.png)
+
+Upon starting the GUI, the market view window will display a candle 
+graph of recent prices. Individual trades are listed at the bottom.
+
+
+![Adding indicators](/screenshots/addindicator.png)
+
+The "Add indicators" button opens the indicator dialog where new indicators
+can be selected. Simple and exponential moving averages (SMA and EMA) 
+and moving average convergence-divergence (MACD) indicators are currently 
+implemented. 
+
+
+![Market view with indicators](/screenshots/withindicators.png)
+
+Plots of indicators can be toggled on and off from the market view window
+from the list in the lower-right corner.
+
+
+![Setting up trading](/screenshots/tradersetup.png)
+
+The "Trader setup" button opens a dialog where a trading strategy is
+selected (currently only a Moving Average Crossover strategy is 
+implemented). If an API key was not provided when the gui was initialized,
+it should be entered here to begin live trading (still in testing and not
+recommended!).
+
+
+![Trader window](/screenshots/traderwindow.png)
+
+The trader window draws from the API to list personal trade history, 
+current open orders, and current finances. 
 
 
 Acknowledgements
