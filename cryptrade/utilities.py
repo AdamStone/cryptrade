@@ -7,18 +7,32 @@ from datetime import datetime, timedelta
 from decimal import Decimal, getcontext
 getcontext().prec=8
 import itertools
+import traceback
 
 import numpy as np
 
 
-# Data directories; when cryptrade is imported, ROOT is set to wherever the
-# import was called
+# when imported, ROOT is set to wherever the import was called
 ROOT = os.path.dirname(os.path.realpath(sys.argv[0]))
 DATA = os.path.join(ROOT, 'data/')
 
 TRADES = os.path.join(DATA, 'trades/')
 CANDLES = os.path.join(DATA, 'candles/')
 BACKTESTS = os.path.join(DATA, 'backtests/')
+
+
+def save_batchtest(filename, **kwds):
+    if BACKTESTS not in filename:    
+        filename = os.path.join(BACKTESTS, filename)
+    
+    np.savez(filename, **kwds)
+        
+    
+def load_batchtest(filename):
+    if BACKTESTS not in filename:    
+        filename = os.path.join(BACKTESTS, filename)
+        
+        return np.load(filename)
 
 
 def build_data_directories(path=None):
@@ -52,7 +66,8 @@ def parse_period(period):
     """ Accounts for various ways to define candle period, for 
     more flexible and intuitive input. """
     
-    valid = ['h', 'hr', 'hrs', 'hour', 'hours', 
+    valid = ['d', 'day', 'days',
+             'h', 'hr', 'hrs', 'hour', 'hours', 
              'm', 'min', 'mins', 'minute', 'minutes', 
              's', 'sec', 'secs', 'second', 'seconds']
     try:
@@ -72,6 +87,7 @@ def parse_period(period):
         if p_unit in valid:
             return int(p_value), p_unit[0]
         else:
+            print p_unit
             raw_input( "Error: period should be given as a string in the form of 'intvalue timeunit'" )
             return None
             
@@ -99,12 +115,34 @@ def pdelta(*args):
         
     
 def load_candlefile(candlefile):
-    """ Plot a candle graph directly from a candle data file. """
+    """ Get candles and period from a candle data file. """
     
     period = candlefile.split('_')[-1]
-    candles = np.loadtxt(CANDLES + candlefile, delimiter=',')
-    return(candles, period)
+    try:
+        candles = np.loadtxt(CANDLES + candlefile, delimiter=',')
+    except:
+        traceback.print_exc()
+        candles = []
+    return (candles, period)
+
+
+def load_candlefiles(market, periods):
+    """ Get candles from candle data files for given periods 
+    from a given market. """
+
+    try:
+        len(periods)
+    except:
+        periods = [periods]
     
+    candledict = {}
+    for period in periods:
+        p_value, p_unit = parse_period
+        fname = market + '_' + str(p_value) + p_unit
+        candles, period = load_candlefile(fname)
+        candledict[period] = candles
+        
+    return candledict
     
 
 def save_candlefile(candles, period, filename, replace=True):
@@ -135,7 +173,7 @@ def save_candlefile(candles, period, filename, replace=True):
         with open(filename, 'a') as appendfile:
             writer = csv.writer(appendfile)
             for row in candles:            
-                writer.writerow(row)        
+                writer.writerow(row)
 
 
 def get_candle(start, trades):
@@ -166,7 +204,6 @@ def tradefile_to_candles(tradefile, period):
     
     reader = csv.reader(open(tradefile, 'rb'), delimiter=',')
     trades = [{'timestamp':row[0], 'price':row[1], 'amount': row[2]} for row in reader]
-#    {'timestamp':row[0], 'price':row[1], 'amount': row[2]}    
     
     return trades_to_candles(trades, period)
     
@@ -185,7 +222,6 @@ def trades_to_candles(trades, period):
     
     bins = [ (dt_to_ut(start), []) ]
     for trade in trades:
-#        if int(trade['timestamp']) < int(dt_to_ut(start + step)):
         if int(trade['timestamp']) < int(dt_to_ut(start + step)):
             bins[-1][1].append(trade)
         else:
@@ -194,7 +230,6 @@ def trades_to_candles(trades, period):
     
     candles = []
     for start, trades in bins:
-#        if ut_to_dt(start) + step > datetime.
         candle = get_candle(start, trades)
         candles.append(candle)
     return candles

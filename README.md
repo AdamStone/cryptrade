@@ -1,46 +1,56 @@
 cryptrade
 =========
 
-Cryptrade aims to provide a scalable, modular python framework for cryptocurrency 
-trading, including collection and plotting of trade data, backtesting, live 
-trading simulation, and live trade botting. 
+Cryptrade is a cryptocurrency market visualization and automated trading 
+program written in python, with the aim of supporting collection and 
+plotting of live trade data, batch backtesting of trading strategies, 
+live trading simulation, and automated live trading. Current development 
+is focused on the Bitfinex exchange. 
 
-The current (pre)release includes very limited implementation:
+This (pre)release includes a very limited implementation:
 
-    Moving average crossover strategies    
-    Live monitoring and trading simulation of Bitfinex and Bitstamp markets
-    Candleplots of live and historical data
+    Live monitoring and visualization of the Bitfinex BTC/USD market
+    Automated live trading (experimental) of the Bitfinex BTC/USD market
+    Moving average crossover trading strategies with stoploss and risk management
 
-Currently only the Bitfinex API is supported, which includes both Bitfinex and 
-Bitstamp trade data. Backtesting and live trade botting are in progress.
+For now only the Bitfinex API is supported, which broadcasts both Bitfinex and 
+Bitstamp trade data. 
+
+A batch backtesting framework is in progress.
 
 
 Dependencies
 -------------
 
-NumPy and MatPlotLib libraries are required. 
+NumPy, MatPlotLib, Requests, and PyQt4
 
 
 Getting Started
 -------------
 
-A setup.py installer is not yet implemented; scripts can be run from 
-the same directory as the cryptrade package, or the cryptrade package can be
-placed in the python path. Several example scripts are provided which illustrate 
-the basic use. A data directory will be created wherever the scripts are run. 
+An installer is not yet implemented; scripts can be run from the same 
+directory as the cryptrade package, or the cryptrade package can be
+placed in the python path. A data directory will be created where the 
+scripts are run if they are set to record trade and candle data.
+
+Example 1 demonstrates how to start a simple live trade monitor that 
+records and prints new trades in the terminal window as they come in 
+from the exchange. 
+
+Example 2 demonstrates how to start the GUI, which provides a candle plot
+and record of the most recent trades. The GUI currently supports 
+visualization of moving average and MACD indicators, as well as a very 
+experimental implementation of a live trade bot based on a moving average 
+crossover strategy. I AM IN THE EARLY STAGES OF TESTING THE TRADE BOT;
+I DO NOT RECOMMEND USING IT AT THIS TIME UNLESS WITH NEGLIGIBLE AMOUNTS 
+OF MONEY. 
+
+On the first run with no local data available, the most recent 2 hours
+of trades will be obtained from the API. If set to record data (the default
+case), local files of trade and candle data will be accumulated as the 
+program continues to run.
 
 
-Issues with Windows
--------------
-
-MatPlotLib interactive mode is not well-behaved on Windows, and plot 
-window may resist moving or resizing while showing a (Not Responding) status.
-Although annoying, this does not mean the program has crashed; scripts will 
-continue to run and the plot will continue to update. This behavior is not 
-observed on Linux, and workarounds for Windows are under investigation.
-
-Note that plotting can be disabled for CandleStream and Trader objects by 
-setting the optional argument plot_ncandles=0. 
 
 
 Acknowledgements
