@@ -43,7 +43,7 @@ class MainWindow(QtGui.QMainWindow):
         self.tradestream = TradeStream(record_trades=record_trades, quiet=True)
         self.indicators = []
         
-        self.marketOptions = ['bitfinex_BTC_USD','bitstamp_BTC_USD']
+        self.marketOptions = ['bitfinex_BTC_USD']#,'bitstamp_BTC_USD']
         self.periodOptions = ['5 minute', '10 minute', '15 minute', '30 minute', 
                               '1 hour', '2 hour', '6 hour', '12 hour', '24 hour']
                               

@@ -13,8 +13,7 @@ This (pre)release includes a very limited implementation:
     Automated live trading (experimental) of the Bitfinex BTC/USD market
     Moving average crossover trading strategies with stoploss and risk management
 
-For now only the Bitfinex API is supported, which broadcasts both Bitfinex and 
-Bitstamp trade data. 
+For now only the Bitfinex API is supported. 
 
 A batch backtesting framework is in progress.
 
