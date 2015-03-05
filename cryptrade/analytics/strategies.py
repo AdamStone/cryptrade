@@ -1,43 +1,45 @@
 from __future__ import division
 from decimal import Decimal, getcontext
-getcontext().prec=8
+getcontext().prec = 8
 
 from PyQt4 import QtGui, QtCore
 
 import conditions
 from indicators import SMA, EMA
 
+
 class Strategy(object):
-    """ A Strategy is a set of Conditions which defines when 
-    trades should be executed in backtesting or live trading. 
-    
+    """ A Strategy is a set of Conditions which defines when
+    trades should be executed in backtesting or live trading.
+
     AND and AND NOT relationships between Conditions are achieved using
     arithmetic operators, e.g. for conditions A and B,
-        
+
         A + B yields a new Condition which represents A AND B
         A - B yields a new Condition which represents A AND NOT B
-        
+
     OR relationships are achieved by passing a list of conditions to either
     set_buy_conditions() or set_sell_conditions; if any condition evaluates
-    True on a check() call, the check returns True. 
+    True on a check() call, the check returns True.
 
     By default, a strategy will trade the full amount of a given currency. The
-    set_risk(fraction_of_equity) method specifies a fraction of equity to risk 
+    set_risk(fraction_of_equity) method specifies a fraction of equity to risk
     per trade instead, for risk-management strategies.
-    
-    Stoploss mechanisms are included as a special trade condition and can be 
-    enabled by calling set_stoploss(fraction_of_entry_price). Unlike 
-    Indicator/Condition-based market orders, stoploss sell orders are 
-    placed as stop orders at the time of a buy order and are automatically 
-    executed as soon as the threshold is met, without waiting for the candle 
-    to finish. 
-    
-    The exchange fees can be specified by calling set_commission(fraction_of_trade).
-    The Bitfinex .12% is used as the default case. This is used in predicting
-    trade costs and risk management, but note that when livetrading, the fee 
-    is determined by the exchange regardless of the value entered here. 
+
+    Stoploss mechanisms are included as a special trade condition and can be
+    enabled by calling set_stoploss(fraction_of_entry_price). Unlike
+    Indicator/Condition-based market orders, stoploss sell orders are
+    placed as stop orders at the time of a buy order and are automatically
+    executed as soon as the threshold is met, without waiting for the candle
+    to finish.
+
+    The exchange fees can be specified by calling
+    set_commission(fraction_of_trade). The Bitfinex .12% is used as the
+    default case. This is used in predicting trade costs and risk management,
+    but note that when livetrading, the fee is determined by the exchange
+    regardless of the value entered here.
     """
-    
+
     def __init__(self):
         self.buy_conditions = []
         self.sell_conditions = []
@@ -53,25 +55,25 @@ class Strategy(object):
         self.buy_conditions = []
         for condition in buy_conditions:
             self.buy_conditions.append(condition)
-            
+
     def set_sell_condition(self, sell_condition):
         self.sell_conditions = [sell_condition]
-    
+
     def set_sell_conditions(self, sell_conditions):
         self.sell_conditions = []
         for condition in sell_conditions:
             self.sell_conditions.append(condition)
-    
+
     def set_risk(self, fraction_of_equity):
         self.risk = Decimal(str(fraction_of_equity))
-        
+
     def set_stoploss(self, fraction_of_entry_price):
         self.stoploss = Decimal(str(fraction_of_entry_price))
-        
-    def set_commission(self, fraction_of_trade):
-        self.commission = Decimal(str(fraction_of_trade))   
 
-    def check(self, **kwargs): 
+    def set_commission(self, fraction_of_trade):
+        self.commission = Decimal(str(fraction_of_trade))
+
+    def check(self, **kwargs):
         for condition in self.buy_conditions:
             if condition.check(**kwargs):
                 return 'Buy'
@@ -79,52 +81,54 @@ class Strategy(object):
             if condition.check(**kwargs):
                 return 'Sell'
 
-    
 
 class MovingAverageCrossoverStrategy(Strategy):
     """ Trade based on a pair of moving averages, with a 'buy' condition
-    obtained when the short-term average is higher than the long-term and 
-    a 'sell' condition obtained in the reverse case. 
+    obtained when the short-term average is higher than the long-term and
+    a 'sell' condition obtained in the reverse case.
     """
-    
+
     name = 'Moving average crossover'
 
     def __init__(self, ma1, ma2):
         super(MovingAverageCrossoverStrategy, self).__init__()
-        self.averages = ma1, ma2 = sorted((ma1, ma2), key=lambda x: x.window) # deal with last vs last two; deal with stop orders
+
+        # deal with last vs last two; deal with stop orders
+        self.averages = ma1, ma2 = sorted((ma1, ma2), key=lambda x: x.window)
 
         trend_condition = conditions.GreaterThan(ma1, ma2)
 
         # buy if ma1 > ma2 and not positioned long
         buy_condition = trend_condition - conditions.LongPosition()
-        
+
         # additionally, block buys if RecentStoploss condition is True
         buy_condition -= conditions.RecentStoploss(trend_condition)
-        
+
         # sell if ma2 > ma1 and positioned long
-        sell_condition = conditions.GreaterThan(ma2, ma1) + conditions.LongPosition()
-        
-        self.set_buy_condition( buy_condition )
-        self.set_sell_condition( sell_condition )
-        
+        sell_condition = (conditions.GreaterThan(ma2, ma1) +
+                          conditions.LongPosition())
+
+        self.set_buy_condition(buy_condition)
+        self.set_sell_condition(sell_condition)
+
     @staticmethod
     def qtFrame(parent=None):
         """ Handle for the GUI to access the associated setup frame.
         """
         return MovingAverageCrossoverFrame(parent)
-        
+
 
 class MovingAverageCrossoverFrame(QtGui.QFrame):
     """ GUI frame to be used in setting up the MovingAverageCrossover
-    trading strategy. Since different strategies may generally require 
-    different inputs, each subclass of Strategy to be used in the GUI should 
-    include a qtFrame @staticmethod which points to a corresponding QFrame 
+    trading strategy. Since different strategies may generally require
+    different inputs, each subclass of Strategy to be used in the GUI should
+    include a qtFrame @staticmethod which points to a corresponding QFrame
     object.
     """
-    
-    enableOk = QtCore.pyqtSignal()    
+
+    enableOk = QtCore.pyqtSignal()
     disableOk = QtCore.pyqtSignal()
-    
+
     def __init__(self, parent=None):
         super(MovingAverageCrossoverFrame, self).__init__(parent)
 
@@ -136,7 +140,7 @@ class MovingAverageCrossoverFrame(QtGui.QFrame):
         self.avgList.setModel(self.avgModel)
         self.avgModel.itemChanged.connect(self.checkValid)
         self.avgList.setMaximumHeight(100)
-        
+
         # get current indicators from parent
         self.indicators = self.parent().parent().indicators
         for i, ind in enumerate(self.indicators):
@@ -152,10 +156,10 @@ class MovingAverageCrossoverFrame(QtGui.QFrame):
                 item.setEditable(False)
                 item.indicatorObject = ind[0]
                 self.avgModel.appendRow(item)
-        
+
         layout.addWidget(QtGui.QLabel('Implemented averages (select 2)'))
         layout.addWidget(self.avgList)
-        
+
         self.setLayout(layout)
 
     def checkValid(self):
@@ -163,7 +167,7 @@ class MovingAverageCrossoverFrame(QtGui.QFrame):
         checked = 0
         for i in range(rows):
             checked += self.avgModel.item(i).checkState()/2
-        
+
         if checked == 2:
             self.enableOk.emit()
         else:
@@ -180,4 +184,3 @@ class MovingAverageCrossoverFrame(QtGui.QFrame):
 
     def reset(self):
         pass
-    
