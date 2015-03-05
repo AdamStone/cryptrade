@@ -1,32 +1,31 @@
 from __future__ import division
 import numpy as np
 from decimal import Decimal, getcontext
-getcontext().prec=8
+getcontext().prec = 8
 
 from PyQt4 import QtGui, QtCore
 
 
 class Indicator(object):
     """ Indicator is the base class for technical indicators like moving
-    averages. Subclasses should include a calculate(candles) method which 
+    averages. Subclasses should include a calculate(candles) method which
     defines the mathematics of the indicator, and a plot_type attribute
-    which indicates whether it should be plotted on the large upper subplot 
-    ('primary') or the smaller bottom subplot ('secondary') in the GUI. 
-    
-    Indicators can be used to define Conditions and can be directly compared 
-    (e.g. EMA10 > EMA21) if containing value arrays of the same length. 
-    Comparisons can also be made between Indicators and numbers, e.g. 
-    MACD > 0.  Comparisons yield a boolean array of the same length. Care 
-    should be taken when making comparisons this way or using the stored 
-    values, since they represent only the result of the last calculate(candles) 
-    call, which may become outdated.    
+    which indicates whether it should be plotted on the large upper subplot
+    ('primary') or the smaller bottom subplot ('secondary') in the GUI.
+
+    Indicators can be used to define Conditions and can be directly compared
+    (e.g. EMA10 > EMA21) if containing value arrays of the same length.
+    Comparisons can also be made between Indicators and numbers, e.g.
+    MACD > 0.  Comparisons yield a boolean array of the same length. Care
+    should be taken when making comparisons this way or using the stored
+    values, since they represent only the result of the last calculate(candles)
+    call, which may become outdated.
     """
     def __init__(self, label=None):
         """ label will be used in the GUI plot legend.
         """
         self.label = label
-        self.values = None        
-        
+        self.values = None
 
     def __lt__(self, other):
         try:
@@ -63,23 +62,21 @@ class Indicator(object):
             return np.array(self.values) != np.array(other.values)
         except:
             return np.array(self.values) != other
-        
+
     def __getitem__(self, arg):
         return np.array(self.values)[arg]
 
 
-
-
 class SMA(Indicator):
     """ Simple moving average. """
-    
-    name='Simple moving average'
-    
+
+    name = 'Simple moving average'
+
     def __init__(self, window):
         super(SMA, self).__init__(label='SMA ' + str(window))
         self.window = int(window)
         self.plot_type = 'primary'
-        
+
     def calculate(self, candles):
         closes = np.array(candles).transpose()[2]
         values = []
@@ -91,23 +88,22 @@ class SMA(Indicator):
             values.append(pt)
         self.values = np.array(values)
         return self.values
-        
+
     @staticmethod
     def qtFrame(parent):
         """ Handle for the GUI to access the associated setup frame.
         """
         return SMAFrame(parent)
-        
-        
+
+
 class SMAFrame(QtGui.QFrame):
-    """ GUI frame for setting up an SMA. 
-    """
-    enableAdd = QtCore.pyqtSignal()    
+    """ GUI frame for setting up an SMA. """
+    enableAdd = QtCore.pyqtSignal()
     disableAdd = QtCore.pyqtSignal()
-    
+
     def __init__(self, parent):
         super(SMAFrame, self).__init__(parent)
-        
+
         hbox = QtGui.QHBoxLayout()
         hbox.addStretch(1)
         label = QtGui.QLabel('Window:')
@@ -119,35 +115,33 @@ class SMAFrame(QtGui.QFrame):
         self.setLayout(hbox)
 
     def checkValid(self):
-        """ Check if input fields are valid to enable OK button. 
-        """
+        """ Check if input fields are valid to enable OK button. """
         try:
             int(self.window.text())
             for ind in self.parent().parent().indicators:
-                if type(ind[0]) == SMA and ind[0].window == int(self.window.text()):
+                if (type(ind[0]) == SMA and
+                        ind[0].window == int(self.window.text())):
                     self.disableAdd.emit()
                     return
             self.enableAdd.emit()
         except:
             self.disableAdd.emit()
-            
+
     def inputs(self):
         """ Get the appropriate values from the frame to pass to the
-        constructor of the indicator. 
-        """
+        constructor of the indicator. """
         return (self.window.text(),)
-        
+
     def reset(self):
         pass
 
 
 class EMA(Indicator):
-    """ Exponential moving average. 
-    """
+    """ Exponential moving average. """
     name = 'Exponential moving average'
-    
+
     def __init__(self, window):
-        Indicator.__init__(self, label = 'EMA ' + str(window))
+        Indicator.__init__(self, label='EMA ' + str(window))
         self.window = int(window)
         self.plot_type = 'primary'
 
@@ -164,23 +158,21 @@ class EMA(Indicator):
             values.append(pt)
         self.values = np.array(values)
         return self.values
-        
+
     @staticmethod
     def qtFrame(parent=None):
-        """ Handle for the GUI to access the associated setup frame.
-        """        
+        """ Handle for the GUI to access the associated setup frame. """
         return EMAFrame(parent)
-        
+
 
 class EMAFrame(QtGui.QFrame):
-    """ GUI frame for setting up an EMA. 
-    """
-    enableAdd = QtCore.pyqtSignal()    
+    """ GUI frame for setting up an EMA. """
+    enableAdd = QtCore.pyqtSignal()
     disableAdd = QtCore.pyqtSignal()
-    
+
     def __init__(self, parent=None):
-        super(EMAFrame, self).__init__(parent)       
-        
+        super(EMAFrame, self).__init__(parent)
+
         hbox = QtGui.QHBoxLayout()
         hbox.addStretch(1)
         label = QtGui.QLabel('Window:')
@@ -192,12 +184,12 @@ class EMAFrame(QtGui.QFrame):
         self.setLayout(hbox)
 
     def checkValid(self):
-        """ Check if input fields are valid to enable OK button. 
-        """
+        """ Check if input fields are valid to enable OK button. """
         try:
             int(self.window.text())
             for ind in self.parent().parent().indicators:
-                if type(ind[0]) == EMA and ind[0].window == int(self.window.text()):
+                if (type(ind[0]) == EMA and
+                        ind[0].window == int(self.window.text())):
                     self.disableAdd.emit()
                     return
             self.enableAdd.emit()
@@ -206,42 +198,40 @@ class EMAFrame(QtGui.QFrame):
 
     def inputs(self):
         """ Get the appropriate values from the frame to pass to the
-        constructor of the indicator. 
+        constructor of the indicator.
         """
         return (self.window.text(),)
 
     def reset(self):
         pass
-        
+
 
 class MACD(Indicator):
     """ Moving average convergence-divergence. """
-    
+
     name = 'Moving average convergence divergence'
-    
+
     def __init__(self, ma1, ma2):
-        Indicator.__init__(self, label = 'MACD')
+        Indicator.__init__(self, label='MACD')
         self.averages = sorted((ma1, ma2), key=lambda x: x.window)
         self.plot_type = 'secondary'
 
     def calculate(self, candles):
-        self.values = self.averages[0].calculate(candles) - self.averages[1].calculate(candles)
+        self.values = (self.averages[0].calculate(candles) -
+                       self.averages[1].calculate(candles))
         return self.values
-    
+
     @staticmethod
     def qtFrame(parent=None):
-        """ Handle for the GUI to access the associated setup frame.
-        """        
+        """ Handle for the GUI to access the associated setup frame. """
         return MACDFrame(parent)
-        
 
 
 class MACDFrame(QtGui.QFrame):
-    """ GUI frame for setting up a MACD. 
-    """    
-    enableAdd = QtCore.pyqtSignal()    
+    """ GUI frame for setting up a MACD. """
+    enableAdd = QtCore.pyqtSignal()
     disableAdd = QtCore.pyqtSignal()
-    
+
     def __init__(self, parent=None):
         super(MACDFrame, self).__init__(parent)
 
@@ -252,7 +242,7 @@ class MACDFrame(QtGui.QFrame):
         self.avgList.setModel(self.avgModel)
         self.avgModel.itemChanged.connect(self.checkValid)
         self.avgList.setMaximumHeight(100)
-        
+
         # get existing indicators from parent
         self.indicators = self.parent().parent().indicators
         for i, ind in enumerate(self.indicators):
@@ -267,15 +257,15 @@ class MACDFrame(QtGui.QFrame):
                 item.setEditable(False)
                 item.indicatorObject = ind[0]
                 self.avgModel.appendRow(item)
-                
+
         layout.addWidget(QtGui.QLabel('Implemented averages (select 2)'))
         layout.addWidget(self.avgList)
-        
+
         self.setLayout(layout)
-        
+
     def checkValid(self):
-        """ Check if input fields are valid to enable OK button. 
-        """
+        """ Check if input fields are valid to enable OK button. """
+
         # see what's currently checked
         current = []
         rows = self.avgModel.rowCount()
@@ -286,26 +276,27 @@ class MACDFrame(QtGui.QFrame):
                 avg = item.indicatorObject
                 current.append((type(avg), avg.window))
         current = sorted(current, key=lambda x: x[1])
-        
+
         # if more or less than 2, disableAdd
         if len(current) != 2:
             self.disableAdd.emit()
-            
+
         else:
             # check if the same MACD is already implemented
             for ind in self.parent().parent().indicators:
                 if type(ind[0]) == MACD:
-                    averages = [(type(avg), avg.window) for avg in ind[0].averages]
+                    averages = [(type(avg), avg.window)
+                                for avg in ind[0].averages]
                     if averages == current:
                         self.disableAdd.emit()
                         return
-            
+
             # if not, enableAdd
             self.enableAdd.emit()
 
     def inputs(self):
         """ Get the appropriate values from the frame to pass to the
-        constructor of the indicator. 
+        constructor of the indicator.
         """
         checked = []
         rows = self.avgModel.rowCount()
@@ -314,6 +305,6 @@ class MACDFrame(QtGui.QFrame):
             if item.checkState() == 2:
                 checked.append(item.indicatorObject)
         return checked
-        
+
     def reset(self):
         pass
